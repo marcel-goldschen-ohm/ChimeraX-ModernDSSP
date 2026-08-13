@@ -160,6 +160,8 @@ class ModernDSSPTool(ToolInstance):
         self.worker_count = 0
 
         for model in self.session.models.list():
+            if not (model.selected or model.visible):
+                continue
             existing_data = self.get_dssp_data_for_model_id(model.id)
             if existing_data:
                 continue
@@ -321,6 +323,10 @@ class ModernDSSPTool(ToolInstance):
             self.session.logger.warning("No DSSP data available. Please run DSSP first.")
             return
         for data in self.dssp_data:
+            model_id = data['model_id']
+            model = self.get_model_by_id(model_id)
+            if not (model.selected or model.visible):
+                continue
             for key, selection in data['selections'].items():
                 color = self.dssp_schema[key]["color"]
                 for residue in selection['residues']:
@@ -331,6 +337,10 @@ class ModernDSSPTool(ToolInstance):
             self.session.logger.warning("No DSSP data available. Please run DSSP first.")
             return
         for data in self.dssp_data:
+            model_id = data['model_id']
+            model = self.get_model_by_id(model_id)
+            if not (model.selected or model.visible):
+                continue
             for key, selection in data['selections'].items():
                 color = self.dssp_schema[key]["color"]
                 selection['atoms'].colors = [color] * len(selection['atoms'])
