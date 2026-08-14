@@ -99,6 +99,9 @@ class SecondaryStructureTool(ToolInstance):
         
         self.settings_button = QPushButton("Settings")
         self.settings_button.clicked.connect(self.settings)
+        
+        self.help_button = QPushButton("Help")
+        self.help_button.clicked.connect(self.show_help)
 
         layout = QGridLayout()
         layout.setContentsMargins(5, 5, 5, 5)
@@ -108,6 +111,7 @@ class SecondaryStructureTool(ToolInstance):
         layout.addWidget(self.color_ribbons_button, 0, 1)
         layout.addWidget(self.color_atoms_button, 1, 1)
         layout.addWidget(self.settings_button, 0, 2)
+        layout.addWidget(self.help_button, 1, 2)
 
         # Set the layout as the contents of our window
         self.tool_window.ui_area.setLayout(layout)
@@ -428,6 +432,14 @@ class SecondaryStructureTool(ToolInstance):
             color = self.dssp_schema[key]["color"]
             button.setStyleSheet(f"background-color: rgba{color};")
         self.session.logger.info("DSSP colors reset to default.")
+
+    def show_help(self):
+        from Qt.QtWidgets import QMessageBox
+
+        title = "Secondary Structure Tool Help"
+        text = "For help with the Secondary Structure Tool, please refer to the plugin repository at: https://github.com/marcel-goldschen-ohm/ChimeraX-SecondaryStructure"
+
+        QMessageBox.information(None, title, text)
 
 
 class AppWorkerThread(QThread):
