@@ -243,19 +243,19 @@ class ModernDSSPTool(ToolInstance):
         self.cleanup_temp_files(data)
 
         if self.worker_count == 0:
-            self.session.logger.status("DSSP completed.\n", log=True)
+            self.session.logger.status("Finished running DSSP.\n", log=True)
 
     def handle_dssp_error(self, data, error_message):
         self.worker_count -= 1
 
         model = self.get_model_by_id(data['model_id'])
-        self.session.logger.warning(f"... DSSP failed for {model.name}: {error_message}")
+        self.session.logger.warning(f"... ERROR: DSSP failed for {model.name}: {error_message}")
 
         # Delete the temporary input and output files to clean up
         self.cleanup_temp_files(data)
 
         if self.worker_count == 0:
-            self.session.logger.status("DSSP completed.\n", log=True)
+            self.session.logger.status("Finished running DSSP.\n", log=True)
 
     def clean_dssp(self, data):
         self.cleanup_temp_files(data)
