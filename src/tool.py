@@ -154,7 +154,7 @@ class ModernDSSPTool(ToolInstance):
         self.dssp_data = []
     
     def run_dssp(self):
-        self.session.logger.status(f"Running DSSP at {self.dssp_executable_path} ...", log=True)
+        self.session.logger.status(f"\nRunning DSSP at {self.dssp_executable_path} ...", log=True)
 
         # Keep trach of worker threads for running DSSP in the background. This is important to avoid blocking the GUI.
         self.worker_count = 0
@@ -243,7 +243,7 @@ class ModernDSSPTool(ToolInstance):
         self.cleanup_temp_files(data)
 
         if self.worker_count == 0:
-            self.session.logger.status("DSSP completed.", log=True)
+            self.session.logger.status("DSSP completed.\n", log=True)
 
     def handle_dssp_error(self, data, error_message):
         self.worker_count -= 1
@@ -255,7 +255,7 @@ class ModernDSSPTool(ToolInstance):
         self.cleanup_temp_files(data)
 
         if self.worker_count == 0:
-            self.session.logger.status("DSSP completed.", log=True)
+            self.session.logger.status("DSSP completed.\n", log=True)
 
     def clean_dssp(self, data):
         self.cleanup_temp_files(data)
@@ -325,6 +325,13 @@ class ModernDSSPTool(ToolInstance):
                 'residues': selected_residues,
                 'atoms': atoms
             }
+            for atom in atoms:
+                # custom attribute for easy use in scripts and commands
+                atom.dssp = key
+                # custom properties are discoverable to ChimeraX tools and inspectors
+                if not hasattr(atom, 'custom_properties'):
+                    atom.custom_properties = {}
+                atom.custom_properties['dssp'] = key
         data['selections'] = selections
 
     def color_ribbons(self):
