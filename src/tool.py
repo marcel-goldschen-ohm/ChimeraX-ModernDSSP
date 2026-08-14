@@ -106,7 +106,7 @@ class ModernDSSPTool(ToolInstance):
 
         layout = QGridLayout()
         layout.setContentsMargins(5, 5, 5, 5)
-        layout.setSpacing(5)
+        layout.setSpacing(2)
         layout.addWidget(self.run_button, 0, 0)
         layout.addWidget(self.clear_button, 1, 0)
         layout.addWidget(self.color_ribbons_button, 0, 1)
@@ -159,6 +159,7 @@ class ModernDSSPTool(ToolInstance):
         # Keep trach of worker threads for running DSSP in the background. This is important to avoid blocking the GUI.
         self.worker_count = 0
 
+        models = []
         for model in self.session.models.list():
             if not (model.selected or model.visible):
                 continue
@@ -168,6 +169,14 @@ class ModernDSSPTool(ToolInstance):
             if not self.is_protein_model(model):
                 # self.session.logger.warning(f"Model {model.name} is not a protein model. Skipping DSSP.")
                 continue
+            models.append(model)
+
+        if not models:
+            self.session.logger.status("No new protein models selected for DSSP.", log=True)
+            self.session.logger.info("No new protein models selected for DSSP. DSSP runs only on models that are visible or selected and for which DSSP data is not already available.")
+            return
+
+        for model in models:
             self.start_dssp(model)
 
     def start_dssp(self, model):
