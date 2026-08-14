@@ -15,7 +15,7 @@ from chimerax.core.tools import ToolInstance
 from Qt.QtCore import QThread, Signal
 
 
-class ModernDSSPTool(ToolInstance):
+class SecondaryStructureTool(ToolInstance):
 
     # Inheriting from ToolInstance makes us known to the ChimeraX tool mangager,
     # so we can be notified and take appropriate action when sessions are closed,
@@ -26,7 +26,7 @@ class ModernDSSPTool(ToolInstance):
 
     SESSION_ENDURING = False    # Does this instance persist when session closes
     SESSION_SAVE = False         # We do save/restore in sessions
-    # help = "help:user/tools/tutorial.html" # Let ChimeraX know about our help page
+    # help = "help:user/tools/SecondaryStructure.html" # Let ChimeraX know about our help page
 
     def __init__(self, session, tool_name):
         # 'session'   - chimerax.core.session.Session instance
@@ -37,7 +37,7 @@ class ModernDSSPTool(ToolInstance):
 
         # Set name displayed on title bar (defaults to tool_name)
         # Must be after the superclass init, which would override it.
-        self.display_name = "Modern DSSP Secondary Structure"
+        self.display_name = "Secondary Structure"
 
         # Create the main window for our tool.  The window object will have
         # a 'ui_area' where we place the widgets composing our interface.
@@ -83,10 +83,6 @@ class ModernDSSPTool(ToolInstance):
 
     def _build_ui(self):
         # Put our widgets in the tool window
-
-        # We will use an editable single-line text input field (QLineEdit)
-        # with a descriptive text label to the left of it (QLabel).  To
-        # arrange them horizontally side by side we use QHBoxLayout
         from Qt.QtWidgets import QPushButton, QGridLayout
 
         self.run_button = QPushButton("Run")
@@ -150,7 +146,7 @@ class ModernDSSPTool(ToolInstance):
 
     def clear_dssp(self):
         for data in self.dssp_data:
-            self.cleanup_temp_files(data)
+            self._cleanup_temp_files(data)
         self.dssp_data = []
     
     def run_dssp(self):
@@ -219,11 +215,11 @@ class ModernDSSPTool(ToolInstance):
         self.worker_count += 1
         self.worker = AppWorkerThread(cmd_list)
         # self.worker.output_received.connect(self.handle_live_log)
-        self.worker.finished_successfully.connect(lambda data=data: self.finish_dssp(data))
-        self.worker.failed.connect(lambda error_message, data=data: self.handle_dssp_error(data, error_message))
+        self.worker.finished_successfully.connect(lambda data=data: self._finish_dssp(data))
+        self.worker.failed.connect(lambda error_message, data=data: self._handle_dssp_error(data, error_message))
         self.worker.start()
 
-    def finish_dssp(self, data):
+    def _finish_dssp(self, data):
         self.worker_count -= 1
 
         model = self.get_model_by_id(data['model_id'])
@@ -234,34 +230,34 @@ class ModernDSSPTool(ToolInstance):
             data['dssp'] = f.read()
 
         # Parse the DSSP output to extract chain IDs, residue numbers, and secondary structures
-        self.parse_dssp_output(data)
+        self._parse_dssp_output(data)
 
         # Log the DSSP output for the model
         # self.log_dssp_output(data)
 
         # Delete the temporary input and output files to clean up
-        self.cleanup_temp_files(data)
+        self._cleanup_temp_files(data)
 
         if self.worker_count == 0:
             self.session.logger.status("Finished running DSSP.\n", log=True)
 
-    def handle_dssp_error(self, data, error_message):
+    def _handle_dssp_error(self, data, error_message):
         self.worker_count -= 1
 
         model = self.get_model_by_id(data['model_id'])
         self.session.logger.warning(f"... ERROR: DSSP failed for {model.name}: {error_message}")
 
         # Delete the temporary input and output files to clean up
-        self.cleanup_temp_files(data)
+        self._cleanup_temp_files(data)
 
         if self.worker_count == 0:
             self.session.logger.status("Finished running DSSP.\n", log=True)
 
-    def clean_dssp(self, data):
-        self.cleanup_temp_files(data)
+    def _clean_dssp(self, data):
+        self._cleanup_temp_files(data)
         self.dssp_data.remove(data)
 
-    def cleanup_temp_files(self, data):
+    def _cleanup_temp_files(self, data):
         import os
         temp_file = data.get('input_file', None)
         if temp_file and os.path.exists(temp_file):
@@ -272,13 +268,13 @@ class ModernDSSPTool(ToolInstance):
             os.remove(temp_file)
             data['output_file'] = None
 
-    def log_dssp_output(self, data):
+    def _log_dssp_output(self, data):
         model = self.get_model_by_id(data['model_id'])
         self.session.logger.info(f"DSSP Output for {model.name}:")
         for chain_id, residue_number, secondary_structure in zip(data['chain_ids'], data['residue_numbers'], data['secondary_structures']):
             self.session.logger.info(f"{chain_id} {residue_number:>6} {secondary_structure}")
 
-    def parse_dssp_output(self, data):
+    def _parse_dssp_output(self, data):
         import numpy as np
         chain_ids = []
         residue_numbers = []
@@ -384,7 +380,7 @@ class ModernDSSPTool(ToolInstance):
             color = self.dssp_schema[key]["color"]
             button = QToolButton()
             button.setStyleSheet(f"background-color: rgba{color};")
-            button.clicked.connect(lambda _, k=key: self.pick_color(k))
+            button.clicked.connect(lambda _, k=key: self._pick_color(k))
             self.color_buttons[key] = button
             layout.addRow(f"{description} ({key})", button)
 
@@ -411,7 +407,7 @@ class ModernDSSPTool(ToolInstance):
 
         self.color_buttons = {}
 
-    def pick_color(self, key):
+    def _pick_color(self, key):
         from Qt.QtGui import QColor
         from Qt.QtWidgets import QColorDialog
         description = self.dssp_schema[key]["description"]

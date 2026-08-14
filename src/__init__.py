@@ -6,7 +6,7 @@ from chimerax.core.toolshed import BundleAPI
 # Subclass from chimerax.core.toolshed.BundleAPI and
 # override the method for registering commands,
 # inheriting all other methods from the base class.
-class _MyAPI(BundleAPI):
+class _SecondaryStructureAPI(BundleAPI):
 
     api_version = 1     # register_command called with BundleInfo and
                         # CommandInfo instance instead of command name
@@ -25,19 +25,19 @@ class _MyAPI(BundleAPI):
         # ones listed in bundle_info.xml (without the leading and
         # trailing whitespace), and create and return an instance of the
         # appropriate class from the ``tool`` module.
-        if ti.name == "Modern DSSP Secondary Structure":
+        if ti.name == "Secondary Structure":
             from . import tool
-            return tool.ModernDSSPTool(session, ti.name)
+            return tool.SecondaryStructureTool(session, ti.name)
         raise ValueError("trying to start unknown tool: %s" % ti.name)
 
     @staticmethod
     def get_class(class_name):
         # class_name will be a string
-        if class_name == "ModernDSSPTool":
+        if class_name == "SecondaryStructureTool":
             from . import tool
-            return tool.ModernDSSPTool
+            return tool.SecondaryStructureTool
         raise ValueError("Unknown class name '%s'" % class_name)
 
 
 # Create the ``bundle_api`` object that ChimeraX expects.
-bundle_api = _MyAPI()
+bundle_api = _SecondaryStructureAPI()
