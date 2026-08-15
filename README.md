@@ -4,7 +4,7 @@ Modern DSSP secondary structure visualization
 *Author:* Marcel Goldschen-Ohm, <goldschen-ohm@utexas.edu>
 
 ## Purpose
-Allows use of a modern version of DSSP instead of the legacy version installed in ChimeraX which does not annotate things such as pi-helices.
+Allows use of a modern version of DSSP for visualizing secondary structures beyond only alpha helices, beta sheets, and coils, which are already straightforward in ChimeraX. Highlights additional secondary structures including pi helices, 3-10 helices, poly-proline helices, beta bridges, and hydrogen-bonded turns.
 
 ## Requirements
 **Requires installation of DSSP.** For example, on macOS you can install it with Homebrew: `brew install brewsci/bio/dssp`, in which case the executable may be located at `/opt/homebrew/bin/mkdssp` depending on your homebrew setup. Tested on `mkdssp version 4.6.1`.
