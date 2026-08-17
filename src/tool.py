@@ -392,6 +392,14 @@ class SecondaryStructureTool(ToolInstance):
         default_colors_button.clicked.connect(self.default_colors)
         layout.addRow(default_colors_button)
 
+        save_colors_button = QPushButton("Save Color Scheme")
+        save_colors_button.pressed.connect(self.save_color_scheme)
+        layout.addRow(save_colors_button)
+
+        load_colors_button = QPushButton("Load Color Scheme")
+        load_colors_button.pressed.connect(self.load_color_scheme)
+        layout.addRow(load_colors_button)
+
         buttons = QDialogButtonBox(dialog)
         buttons.addButton(QDialogButtonBox.StandardButton.Ok)
         buttons.addButton(QDialogButtonBox.StandardButton.Cancel)
@@ -428,10 +436,16 @@ class SecondaryStructureTool(ToolInstance):
     def default_colors(self):
         from copy import deepcopy
         self.dssp_schema = deepcopy(self.default_dssp_schema)
-        for key, button in self.color_buttons.items():
-            color = self.dssp_schema[key]["color"]
-            button.setStyleSheet(f"background-color: rgba{color};")
+        self._update_color_buttons()
         self.session.logger.info("DSSP colors reset to default.")
+
+    def _update_color_buttons(self):
+        try:
+            for key, button in self.color_buttons.items():
+                color = self.dssp_schema[key]["color"]
+                button.setStyleSheet(f"background-color: rgba{color};")
+        except:
+            pass
 
     def show_help(self):
         from Qt.QtWidgets import QMessageBox
@@ -440,6 +454,33 @@ class SecondaryStructureTool(ToolInstance):
         text = "For help with the Secondary Structure Tool, please refer to the plugin repository at: https://github.com/marcel-goldschen-ohm/ChimeraX-SecondaryStructure"
 
         QMessageBox.information(None, title, text)
+
+    def save_color_scheme(self, file_path=None):
+        import json
+        if file_path is None:
+            from Qt.QtWidgets import QFileDialog
+            file_path, _ = QFileDialog.getSaveFileName(None, "Save DSSP Color Scheme", "", "JSON Files (*.json);;All Files (*)")
+            if not file_path:
+                return
+        with open(file_path, 'w') as f:
+            json.dump(self.dssp_schema, f, indent=4)
+        self.session.logger.info(f"DSSP color scheme saved to {file_path}")
+
+    def load_color_scheme(self, file_path=None):
+        import json
+        if file_path is None:
+            from Qt.QtWidgets import QFileDialog
+            file_path, _ = QFileDialog.getOpenFileName(None, "Load DSSP Color Scheme", "", "JSON Files (*.json);;All Files (*)")
+            if not file_path:
+                return
+        with open(file_path, 'r') as f:
+            self.dssp_schema = json.load(f)
+            for key in self.dssp_schema:
+                color = self.dssp_schema[key]["color"]
+                r, g, b, a = color
+                self.dssp_schema[key]["color"] = (r, g, b, a)
+        self._update_color_buttons()
+        self.session.logger.info(f"DSSP color scheme loaded from {file_path}")
 
 
 class AppWorkerThread(QThread):
